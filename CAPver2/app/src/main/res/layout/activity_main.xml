@@ -81,6 +81,17 @@
         app:layout_constraintTop_toBottomOf="@+id/btnBluetoothOn" />
 
 
+    <Button
+        android:id="@+id/btnSetUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginLeft="50dp"
+        android:text="Button"
+        app:layout_constraintBottom_toTopOf="@+id/tvSendData"
+        app:layout_constraintStart_toEndOf="@+id/btnConnect"
+        app:layout_constraintTop_toBottomOf="@+id/btnBluetoothOff" />
+
     <TextView
         android:id="@+id/pitch"
         android:layout_width="wrap_content"
@@ -124,28 +135,28 @@
         app:layout_constraintTop_toBottomOf="@+id/btnConnect" />
 
 
-
     <EditText
 
-    android:id="@+id/tvSendData"
+        android:id="@+id/tvSendData"
 
-    android:layout_width="wrap_content"
+        android:layout_width="wrap_content"
 
-    android:layout_height="wrap_content"
+        android:layout_height="wrap_content"
 
-    android:layout_marginStart="8dp"
+        android:layout_marginStart="8dp"
 
-    android:layout_marginLeft="8dp"
+        android:layout_marginLeft="8dp"
 
-    android:ems="10"
+        android:ems="10"
 
-    android:inputType="textPersonName"
+        android:inputType="textPersonName"
 
-    android:text="Send Data"
+        android:text="Send Data"
 
-    app:layout_constraintStart_toEndOf="@+id/btnSendData"
+        app:layout_constraintBottom_toTopOf="@+id/tvReceiveData"
 
-    app:layout_constraintTop_toTopOf="@+id/btnSendData" />
+        app:layout_constraintStart_toEndOf="@+id/btnSendData"
+        app:layout_constraintTop_toTopOf="@+id/btnSendData" />
 
 
     <LinearLayout
@@ -153,7 +164,7 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
+        app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="0dp">
 
         <com.github.mikephil.charting.charts.LineChart
@@ -162,7 +173,6 @@
             android:layout_height="500dp"
 
             />
-
 
 
     </LinearLayout>

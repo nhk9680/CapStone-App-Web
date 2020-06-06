@@ -1,51 +1,24 @@
 package com.example.capver2;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.annotation.SuppressLint;
-import android.graphics.Color;
-import android.icu.text.AlphabeticIndex;
-import android.os.Bundle;
-
-
-
 import android.bluetooth.BluetoothAdapter;
-
 import android.bluetooth.BluetoothDevice;
-
 import android.bluetooth.BluetoothSocket;
-
 import android.content.DialogInterface;
-
 import android.content.Intent;
-
-
+import android.graphics.Color;
+import android.os.Bundle;
 import android.os.Handler;
-
 import android.os.SystemClock;
-
-//import android.support.v7.app.AlertDialog;
-
-//import android.support.v7.app.AppCompatActivity;
-
 import android.util.Log;
 import android.view.View;
-
-import android.webkit.WebView;
 import android.widget.Button;
-
 import android.widget.EditText;
-
 import android.widget.TextView;
-
 import android.widget.Toast;
-
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -54,45 +27,32 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
-
 import java.io.InputStream;
-
 import java.io.OutputStream;
-
 import java.io.UnsupportedEncodingException;
-
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-
-import java.util.Collection;
 import java.util.List;
-
 import java.util.Set;
-
 import java.util.UUID;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import app.akexorcist.bluetotohspp.library.BluetoothSPP;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 
+//import android.support.v7.app.AlertDialog;
+//import android.support.v7.app.AppCompatActivity;
+
 public class MainActivity extends AppCompatActivity {
-    private LineChart chart;
-    private ArrayList<String> xVals;
-    private ArrayList<ILineDataSet> iLineDataSets;
-    private  LineData lineData;
-
-    private int X_RANGE=500;
-    private int DATA_RANGE=100;
-
-    private BluetoothSPP bt;
-
-    private String str;
-    private String v1, v2, v3;
-    private Socket mSocket;
-
+    final static int BT_REQUEST_ENABLE = 1;
+    final static int BT_MESSAGE_READ = 2;
+    final static int BT_CONNECTING_STATUS = 3;
+    final static UUID BT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    public static int index = 0;
     //블루투스가 켜졌는지 아닌지
     TextView mTvBluetoothStatus;
     //ReceiveData=받는데이터
@@ -100,41 +60,37 @@ public class MainActivity extends AppCompatActivity {
     //SendDat=보낼데이터
     TextView mTvSendData;
     TextView extra;
-
     Button mBtnBluetoothOn;
     Button mBtnBluetoothOff;
     //연결하기
     Button mBtnConnect;
     //전송버튼
     Button mBtnSendData;
-
-
     BluetoothAdapter mBluetoothAdapter;
     Set<BluetoothDevice> mPairedDevices;
     List<String> mListPairedDevices;
-
-
     Handler mBluetoothHandler;
     ConnectedBluetoothThread mThreadConnectedBluetooth;
     BluetoothDevice mBluetoothDevice;
     BluetoothSocket mBluetoothSocket;
-
-
-
-    final static int BT_REQUEST_ENABLE = 1;
-
-    final static int BT_MESSAGE_READ = 2;
-
-    final static int BT_CONNECTING_STATUS = 3;
-
-    final static UUID BT_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
     ArrayList<Entry> xVal1;
     ArrayList<Entry> xVal2;
     ArrayList<Entry> xVal3;
     LineDataSet setXcomp1;
     LineDataSet setXcomp2;
     LineDataSet setXcomp3;
+    private Button btnSetUrl;
+    private LineChart chart;
+    private ArrayList<String> xVals;
+    private ArrayList<ILineDataSet> iLineDataSets;
+    private LineData lineData;
+    private int X_RANGE = 500;
+    private int DATA_RANGE = 100;
+    private BluetoothSPP bt;
+    private String serverURL;
+    private String v1, v2, v3;
+    private Socket mSocket;
+    private float k_old, k2_old, k3_old;
 
     @Override
 
@@ -143,16 +99,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //////////////////////////////////////
-        str = "http://74c232c13e2a.ngrok.io ";
-        try{
-            mSocket = IO.socket(str);
-            mSocket.connect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        //////////////////////////////////////
-
+        btnSetUrl = findViewById(R.id.btnSetUrl);
         bt = new BluetoothSPP(this);
 
         mTvBluetoothStatus = (TextView) findViewById(R.id.tvBluetoothStatus);
@@ -202,25 +149,9 @@ public class MainActivity extends AppCompatActivity {
         chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         chartinit();
 
-
-     /*   chart.setAutoScaleMinMaxEnabled(true);
-        chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        chart.getXAxis().setDrawGridLines(false);
-        chart.getXAxis().setDrawAxisLine(false);
-        chart.getXAxis().setEnabled(true);
-        chart.setDrawMarkers(false);
-
-
-        YAxis leftAxis = chart.getAxisLeft();
-        leftAxis.setAxisMaximum(50f);
-        leftAxis.setAxisMinimum(0f);
-        leftAxis.setDrawGridLines(false);
-
-        YAxis rightAxis = chart.getAxisRight();
-        // rightAxis.setEnabled(true);
-        rightAxis.setAxisMaximum(50f);
-        rightAxis.setAxisMinimum(0f);
-        rightAxis.setDrawGridLines(false);*/
+        k_old = 0.0f;
+        k2_old = 0.0f;
+        k3_old = 0.0f;
 
 
         //BluetoothHandler로 블루투스 연결
@@ -231,59 +162,111 @@ public class MainActivity extends AppCompatActivity {
                     String readMessage = null;
                     try {
                         readMessage = new String((byte[]) msg.obj, "UTF-8");
-
+                        if (readMessage.isEmpty()) return;
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                     //수신된 데이터를 ReceiveData에 표시해줌
                     mTvReceiveData.setText(readMessage); //readMessage로 받아와서
-                    String test = readMessage.substring(0, 16); //String형태로 변환하고 substring으로 잘라줌
+//                    String test = readMessage.substring(0, 16); //String형태로 변환하고 substring으로 잘라줌
+                    String test = readMessage.split("\n")[1];
+                    if (test.isEmpty()) return;
 
                     String[] arr = test.split(":");
 
+                    float k,k2,k3;
+                    try{
+                        k = Float.parseFloat(arr[0]);
+                        k2 = Float.parseFloat(arr[1]);
+                        k3 = Float.parseFloat(arr[2]);
+                    } catch (NumberFormatException e){
+                        k = k_old;
+                        k2 = k2_old;
+                        k3 = k3_old;
+                    }
 
-                    float k = Float.parseFloat(arr[0]);
-                    float k2 = Float.parseFloat(arr[1]);
-                    float k3=Float.parseFloat(arr[2]);
                     //System.out.println(k);
                     //addEntry(k);
                     //addEntry2(k2);
-                    chartUpdate(k,k2,k3);
+                    chartUpdate(k, k2, k3);
 
                     /////////////////////////////////////////
                     // send data to server
 
-                    response(k,k2,k3);
+                    response(k, k2, k3);
 
                     /////////////////////////////////////////
+                    k_old = k;
+                    k2_old = k2;
+                    k3_old = k3;
                 }
             }
         };
 
+        btnSetUrl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText editText = new EditText(MainActivity.this);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+                alertDialogBuilder.setTitle("ngrok 서버 URL 변경");
+                alertDialogBuilder.setTitle("변경할 주소를 복붙해 주세요.");
+                alertDialogBuilder.setView(editText);
+                alertDialogBuilder.setPositiveButton("변경", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //////////////////////////////////////
+                        serverURL = editText.getText().toString();
+                        try {
+                            mSocket = IO.socket(serverURL);
+                            mSocket.connect();
+                        } catch (URISyntaxException e) {
+                            e.printStackTrace();
+                        }
+
+                        //////////////////////////////////////
+                        if (!mSocket.connected()) {
+                            Toast.makeText(getApplicationContext(), "연결되었습니다.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "연결에 실패하였습니다. 서버 상태를 확인해 주세요...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                alertDialogBuilder.setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
+        });
+
     }
-    private  void chartinit(){
+
+    private void chartinit() {
         chart.setAutoScaleMinMaxEnabled(true);
-        iLineDataSets=new ArrayList<ILineDataSet>();
+        iLineDataSets = new ArrayList<ILineDataSet>();
 
-        xVal1=new ArrayList<Entry>();
-        xVal2=new ArrayList<Entry>();
-        xVal3=new ArrayList<Entry>();
+        xVal1 = new ArrayList<Entry>();
+        xVal2 = new ArrayList<Entry>();
+        xVal3 = new ArrayList<Entry>();
 
-        setXcomp1=initLineDataSet(xVal1,"Gyro",Color.RED);
-        setXcomp2=initLineDataSet(xVal2,"Camera",Color.BLUE);
-        setXcomp3=initLineDataSet(xVal3,"Fusion",Color.BLACK);
+        setXcomp1 = initLineDataSet(xVal1, "Gyro", Color.RED);
+        setXcomp2 = initLineDataSet(xVal2, "Camera", Color.BLUE);
+        setXcomp3 = initLineDataSet(xVal3, "Fusion", Color.BLACK);
 
-        xVals=new ArrayList<String>();
-        for(int i=0;i<X_RANGE;i++){
+        xVals = new ArrayList<String>();
+        for (int i = 0; i < X_RANGE; i++) {
             xVals.add("");
         }
         //lineData=new LineData(xVals,iLineDataSets);
-        lineData=new LineData(iLineDataSets);
+        lineData = new LineData(iLineDataSets);
         chart.setData(lineData);
         chart.invalidate();
     }
 
-    private LineDataSet initLineDataSet(ArrayList<Entry> xVal, String label, int color){
+    private LineDataSet initLineDataSet(ArrayList<Entry> xVal, String label, int color) {
         LineDataSet lineDataSet = new LineDataSet(xVal, label);
         lineDataSet.setColor(color);
         lineDataSet.setDrawValues(false);
@@ -294,14 +277,12 @@ public class MainActivity extends AppCompatActivity {
         return lineDataSet;
     }
 
-
-    public static int index = 0;
-    public void chartUpdate(float x,float x2,float x3){
-        if (xVal1.size() > DATA_RANGE){ // 출력범위 초과하면
+    public void chartUpdate(float x, float x2, float x3) {
+        if (xVal1.size() > DATA_RANGE) { // 출력범위 초과하면
             xVal1.remove(0);    //앞에꺼 하나 지우고
             xVal2.remove(0);
             xVal3.remove(0);
-            for (int i=0; i<DATA_RANGE; i++){   // 한칸씩 앞으로 당기는?
+            for (int i = 0; i < DATA_RANGE; i++) {   // 한칸씩 앞으로 당기는?
 //               xVal1.get(i).setXIndex(i); // 원본 코드인데 setXIndex 메소드가 없음
                 xVal1.get(i).setX(i);
                 xVal2.get(i).setX(i);
@@ -310,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
         }
         xVal1.add(new Entry(index, x)); //엔트리 추가
         xVal2.add(new Entry(index, x2)); //이런식으로
-        xVal3.add(new Entry(index,x3));
+        xVal3.add(new Entry(index, x3));
 
 
         setXcomp1.notifyDataSetChanged();
@@ -321,30 +302,29 @@ public class MainActivity extends AppCompatActivity {
         chart.notifyDataSetChanged();
         chart.invalidate();
 
-        if(index < DATA_RANGE) index++;
+        if (index < DATA_RANGE) index++;
     }
 
 
-    private void addEntry(double num ){
-        LineData data= chart.getData();
+    private void addEntry(double num) {
+        LineData data = chart.getData();
 
 
-        if(data==null){
-            data=new LineData();
+        if (data == null) {
+            data = new LineData();
             chart.setData(data);
         }
 
-        ILineDataSet set=data.getDataSetByIndex(0);
+        ILineDataSet set = data.getDataSetByIndex(0);
 
 
-        if(set==null){
-            set=createSet();
+        if (set == null) {
+            set = createSet();
             data.addDataSet(set);
         }
 
 
-        data.addEntry(new Entry((float)set.getEntryCount(),(float)num),0);
-
+        data.addEntry(new Entry((float) set.getEntryCount(), (float) num), 0);
 
 
         data.notifyDataChanged();
@@ -363,9 +343,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private LineDataSet createSet(){
+    private LineDataSet createSet() {
 
-        LineDataSet set=new LineDataSet(null,"Real time Line data");
+        LineDataSet set = new LineDataSet(null, "Real time Line data");
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         set.setColor(ColorTemplate.getHoloBlue());
         set.setCircleColor(ColorTemplate.getHoloBlue());
@@ -373,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
         set.setCircleRadius(4f);
         set.setFillAlpha(65);
         set.setFillColor(ColorTemplate.getHoloBlue());
-        set.setHighLightColor(Color.rgb(244,117,117));
+        set.setHighLightColor(Color.rgb(244, 117, 117));
         set.setValueTextColor(Color.WHITE);
 
 
@@ -381,15 +361,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     void bluetoothOn() {
         //블루투스를 지원하는 기기인지 아닌지 판별
-        if(mBluetoothAdapter == null) {
+        if (mBluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "블루투스를 지원하지 않는 기기입니다.", Toast.LENGTH_LONG).show();
 
-        }
-
-        else {
+        } else {
             //블루투스가 활성화 되어있는지
             if (mBluetoothAdapter.isEnabled()) {
 
@@ -397,9 +374,7 @@ public class MainActivity extends AppCompatActivity {
 
                 mTvBluetoothStatus.setText("활성화");
 
-            }
-
-            else {
+            } else {
 
                 Toast.makeText(getApplicationContext(), "블루투스가 활성화 되어 있지 않습니다.", Toast.LENGTH_LONG).show();
                 //비활성화 되어 있다면 Intent를 이용하여 활성화 창 띄움
@@ -409,6 +384,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     //블루투스 비활성화 method
     void bluetoothOff() {
 
@@ -417,9 +393,7 @@ public class MainActivity extends AppCompatActivity {
             mBluetoothAdapter.disable();
             Toast.makeText(getApplicationContext(), "블루투스가 비활성화 되었습니다.", Toast.LENGTH_SHORT).show();
             mTvBluetoothStatus.setText("비활성화");
-        }
-
-        else {
+        } else {
             Toast.makeText(getApplicationContext(), "블루투스가 이미 비활성화 되어 있습니다.", Toast.LENGTH_SHORT).show();
         }
 
@@ -449,6 +423,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
     }
+
     //블루투스 페어랑 징치 목록 가져오는 method
     void listPairedDevices() {
         //블루투스가 활성화 상태인지 확인
@@ -471,7 +446,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 //페어링된 장치 수를 얻어옴
-                final    CharSequence[] items = mListPairedDevices.toArray(new CharSequence[mListPairedDevices.size()]);
+                final CharSequence[] items = mListPairedDevices.toArray(new CharSequence[mListPairedDevices.size()]);
                 //장치명을 매개변수로 사용하여
                 //connectSelectedDevice method로 전달
                 mListPairedDevices.toArray(new CharSequence[mListPairedDevices.size()]);
@@ -493,21 +468,20 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-        }
-
-        else {
+        } else {
 
             Toast.makeText(getApplicationContext(), "블루투스가 비활성화 되어 있습니다.", Toast.LENGTH_SHORT).show();
 
         }
 
     }
+
     //실제 블루투스 장치와 연결하는 부분
     //listPairedDevices 메서드를 통해 전달받은 매개변수값은 장치 이름임 (selectedDeviceName)
     //그러나 연결에 필요한 값은 장치의 주소
     void connectSelectedDevice(String selectedDeviceName) {
         //for문을 이용해서 페어링된 모든 장치를 검색하며 매개변수와 같은 이름의 장치 주소값 얻음
-        for(BluetoothDevice tempDevice : mPairedDevices) {
+        for (BluetoothDevice tempDevice : mPairedDevices) {
             if (selectedDeviceName.equals(tempDevice.getName())) {
                 mBluetoothDevice = tempDevice;
                 break;
@@ -533,7 +507,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void response(float k, float k2, float k3) {
 
+        v1 = String.valueOf(k);
+        v2 = String.valueOf(k2);
+        v3 = String.valueOf(k3);
+
+        JSONObject data = new JSONObject();
+        try {
+            data.put("v1", v1);
+            data.put("v2", v2);
+            data.put("v3", v3);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        mSocket.emit("chat_message", data);
+    }
+
+
+    //////////////////////////////////////////////
+    // socket clinet /////////////////////////////
 
     private class ConnectedBluetoothThread extends Thread {
 
@@ -567,10 +561,11 @@ public class MainActivity extends AppCompatActivity {
             mmOutStream = tmpOut;
 
         }
+
         //수신받은 데이터는 언제 들어올지 모르니 항상 확인해야함
         public void run() {
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[8192];
             int bytes;
 
             while (true) {
@@ -582,7 +577,11 @@ public class MainActivity extends AppCompatActivity {
                     if (bytes != 0) {
                         SystemClock.sleep(100);
                         bytes = mmInStream.available();
-                        bytes = mmInStream.read(buffer, 0, bytes);
+                        try{
+                            bytes = mmInStream.read(buffer, 0, bytes);
+                        } catch (Exception e){
+                            Log.d("myLog", "Bluetooth read: "+bytes);
+                        }
                         mBluetoothHandler.obtainMessage(BT_MESSAGE_READ, bytes, -1, buffer).sendToTarget();
 
                     }
@@ -596,6 +595,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+
         //데이터 전송을 위한 ConnectedBluetoothThread 의 메서드
         public void write(String str) {
 
@@ -612,6 +612,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
+
         //블루투스 소켓을 닫음->어플을 닫으면 자동으로 닫아짐
         public void cacel() {
 
@@ -627,26 +628,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-    }
-
-
-    //////////////////////////////////////////////
-    // socket clinet /////////////////////////////
-
-    public void response(float k, float k2, float k3){
-        v1 = String.valueOf(k);
-        v2 = String.valueOf(k2);
-        v3 = String.valueOf(k3);
-
-        JSONObject data = new JSONObject();
-        try{
-            data.put("v1", v1);
-            data.put("v2", v2);
-            data.put("v3", v3);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        mSocket.emit("chat_message", data);
     }
 
 

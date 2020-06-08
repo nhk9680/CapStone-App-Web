@@ -23,13 +23,17 @@ def video_feed():
 # --------------------------------------------------
 
 def Communications():
-    coms = Py2ArdComs()
-    coms.run()
+     global coms
+     coms = Py2ArdComs()
+     coms.run()
 
 class Py2ArdComs():
     ThreadRun = 1
     Count = 0
-    arduino = serial.Serial("/dev/ttyACM0", 9600, timeout = 1)
+    try:
+        arduino = serial.Serial("/dev/ttyACM0", 9600, timeout = 1)
+    except:
+        arduino = serial.Serial("/dev/ttyACM1", 9600, timeout = 1)
     FromArduinoData = 0
     ToArduinoData = 1
 
@@ -42,12 +46,14 @@ class Py2ArdComs():
     def send(self,send_data):
         send_data=round(send_data, 2)
         tem="#"+str(int(send_data*100))+'&'+'\n'
-        #print(tem)
+        print("to arduino",send_data)
+        # print("Py2ArdComs send")
         Snum=tem.encode('utf-8')
         self.arduino.write(Snum)
 
     def run(self):
-        global degree,flag_d,tt
+        global degree,flag_d
+       
         data = 0
         LPF_pitch=0
         HPF_pitch=0
@@ -57,7 +63,7 @@ class Py2ArdComs():
         while (self.ThreadRun):
             data = self.arduino.readline()[:-2] #the last bit gets rid of the new-line chars
             if data:
-                print(data)
+                print("from arduino",data)
                 time_s=str(time.time()-tt)
                 imu_d=data.decode('utf-8')
                 fimu.write(time_s+", "+imu_d+"\n")
@@ -108,9 +114,10 @@ def main():
     flag = 0
     degree=0
     f = open("data.txt", 'w')
+    global fimu
     fimu = open("imu_data.txt", 'w')
+    global tt	
     tt=0
-
     # coms = Py2ArdComs()
     t1 = threading.Thread( target=Communications, args="" )
     t1.start()
@@ -181,7 +188,7 @@ def main():
                     degree=-0.0025*degree*degree+1.2922*degree+0.2792
                     
                     coms.send(degree)
-                    #print(degree)
+                    # print(degree)
                     time_s=str(time.time()-tt)
                     cam_d=", %.2f\n"%degree_a
                     f.write(time_s+cam_d)
@@ -218,4 +225,6 @@ def main():
 
 if __name__ == "__main__":
     app.run(host='127.0.0.1',port='5000', debug=True)
+    # coms = Py2ArdComs()
     main()
+

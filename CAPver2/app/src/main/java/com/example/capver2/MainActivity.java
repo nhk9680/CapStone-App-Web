@@ -169,8 +169,11 @@ public class MainActivity extends AppCompatActivity {
                     //수신된 데이터를 ReceiveData에 표시해줌
                     mTvReceiveData.setText(readMessage); //readMessage로 받아와서
 //                    String test = readMessage.substring(0, 16); //String형태로 변환하고 substring으로 잘라줌
-                    String test = readMessage.split("\n")[1];
-                    if (test.isEmpty()) return;
+                    String test = readMessage.split("\n")[0];
+//                    test = readMessage;
+
+//                    if (test.isEmpty()) return;
+                    if (readMessage.isEmpty()) return;
 
                     String[] arr = test.split(":");
 
@@ -499,10 +502,9 @@ public class MainActivity extends AppCompatActivity {
             mThreadConnectedBluetooth.start();
             mBluetoothHandler.obtainMessage(BT_CONNECTING_STATUS, 1, -1).sendToTarget();
 
+            Toast.makeText(getApplicationContext(), "페어링이 완료되었습니다..", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
-
             Toast.makeText(getApplicationContext(), "블루투스 연결 중 오류가 발생했습니다.", Toast.LENGTH_LONG).show();
-
         }
 
     }

@@ -87,7 +87,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
         android:layout_marginLeft="50dp"
-        android:text="Button"
+        android:text="Server"
         app:layout_constraintBottom_toTopOf="@+id/tvSendData"
         app:layout_constraintStart_toEndOf="@+id/btnConnect"
         app:layout_constraintTop_toBottomOf="@+id/btnBluetoothOff" />

@@ -144,9 +144,10 @@
             <td style="width:90%"><div id="chart_div"></div></td>
         </tr>
       </table>
-    <!-- <form action="">
+    <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
-    </form> -->
+    </form>
+      
+      
   </body>
-  <iframe src="http://9789eebcc06b.ngrok.io" style="width:50%; height:500px"></iframe>  
 </html>

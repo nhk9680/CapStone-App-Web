@@ -1,5 +1,7 @@
 # CapStone-App-Web
 
+[앱 다운로드 바로가기](https://github.com/nhk9680/CapStone-App-Web/raw/master/CAPver2/app/release/app-release.apk)
+
 ## 구동방법
 
 - 반드시 <u>**_순!서!대!로!_**</u> 실행해 주셔야 합니다.

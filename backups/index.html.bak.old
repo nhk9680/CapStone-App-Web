@@ -1,0 +1,153 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Balancing Robot Indicator</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        
+                                  // Load the Visualization API and the corechart package.
+      google.charts.load('current', {packages: ['corechart', 'line']});
+        
+      $(function () {
+          var socket = io();
+          
+        $('form').submit(function(e) {
+          e.preventDefault(); // prevents page reloading
+          socket.emit('chat message', $('#m').val());
+          $('#m').val('');
+          return false;
+        });
+        
+          
+        socket.on('chat', function(mymsg){
+            
+            console.log(mymsg.v3);
+            
+//            $('#messages').append($('<li>').text(msg));
+            $('img').css(
+                  "transform", "rotate("+mymsg.v3*1+"deg)"
+            );
+            
+            /////////////////////////////////////////////////
+            
+            
+        google.charts.setOnLoadCallback(drawBasic);
+
+        function rnd(){
+            return Math.floor(Math.random() * 100);
+        }
+            
+        function drawBasic(txt) {
+//            val = txt.split('\n');
+//            acc = val[0].split(' ');
+//            gyr = val[1].split(' ');
+//            fil = val[2].split(' ');
+//            //document.getElementById("test").innerHTML = val;
+            
+            var data1 = new google.visualization.DataTable();            
+            data1.addColumn('number', 'X');
+            data1.addColumn('number', 'x_accel');
+            for (var idx = 0; idx<200; idx++){
+                data1.addRows([
+                    [idx+1, rnd()]
+                ]);
+            }
+            
+            var data2 = new google.visualization.DataTable();            
+            data2.addColumn('number', 'X');
+            data2.addColumn('number', 'x_accel');
+            for (var idx = 0; idx<200; idx++){
+                data2.addRows([
+                    [idx+1, rnd()]
+                ]);
+            }
+            
+            var data3 = new google.visualization.DataTable();            
+            data3.addColumn('number', 'X');
+            data3.addColumn('number', 'x_accel');
+            for (var idx = 0; idx<200; idx++){
+                data3.addRows([
+                    [idx+1, rnd()]
+                ]);
+            }
+            /////////////////////////////////////////////////////////////////////
+            
+
+
+            var options1 = {
+//                'width':4500,
+//                'height':600,
+                hAxis: {
+                    title: 'Accel',
+                    viewWindow:{
+                        max:200,
+                        min:0
+                    }
+                },
+                vAxis: {
+                    title: 'Value'
+                }
+            };
+            var options2 = {
+//                'width':4500,
+//                'height':600,
+                hAxis: {
+                    title: 'Gyro',
+                    viewWindow:{
+                        max:200,
+                        min:0
+                    }
+                },
+                vAxis: {
+                    title: 'Value'
+                }
+            };
+            var options3 = {
+//                'width':4500,
+//                'height':600,
+                hAxis: {
+                    title: 'Filter',
+                    viewWindow:{
+                        max:200,
+                        min:0
+                    }
+                },
+                vAxis: {
+                    title: 'Value'
+                }
+            };
+
+            var chart1 = new google.visualization.LineChart(document.getElementById('chart_div1'));
+            var chart2 = new google.visualization.LineChart(document.getElementById('chart_div2'));
+            var chart3 = new google.visualization.LineChart(document.getElementById('chart_div3'));
+            chart1.draw(data1, options1);
+            chart2.draw(data2, options2);
+            chart3.draw(data3, options3);
+        }
+
+            /////////////////////////////////////////////
+
+
+          
+          
+          
+          
+      });
+      });
+    </script>
+  </head>
+  <body>
+      <ul id="messages"></ul>
+      <img src="https://user-images.githubusercontent.com/30471027/83739503-a57aa080-a690-11ea-9d7e-2590258d15a1.png">
+      <div id="chart_div1"></div>
+      <div id="chart_div2"></div>
+      <div id="chart_div3"></div>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+      
+      
+  </body>
+</html>

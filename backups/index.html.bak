@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Balancing Robot Indicator</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        
+      // Load the Visualization API and the corechart package.
+      google.charts.load('current', {packages: ['corechart', 'line']});
+        
+        
+      $(function (data) {
+          var socket = io();
+          
+        $('form').submit(function(e) {
+          e.preventDefault(); // prevents page reloading
+          socket.emit('chat message', $('#m').val());
+          $('#m').val('');
+          return false;
+        });        
+          
+
+          var data_arr = [];
+        
+          
+        socket.on('chat', function(mymsg){  
+            
+            mymsg[0] = parseFloat(mymsg[0]);
+            mymsg[1] = parseFloat(mymsg[1]);
+            mymsg[2] = parseFloat(mymsg[2]);
+            
+            $('img').css(
+                  "transform", "rotate("+mymsg[2]*1+"deg)"
+            );            
+            
+            data_arr.push(mymsg);
+            
+            if(data_arr.length > 200){
+                data_arr.shift();
+            }
+            
+//            console.log(data_arr);
+            
+            /////////////////////////////////////////////////
+
+            var data = new google.visualization.DataTable();        
+            google.charts.setOnLoadCallback(drawBasic);
+
+            function drawBasic(txt) {
+
+                    
+                data.addColumn('number', 'X');
+                data.addColumn('number', 'Acc');
+                data.addColumn('number', 'Gyro');
+                data.addColumn('number', 'Current Angle');
+//                for (var idx = 0; idx<10; idx++){
+//                    data.addRows([
+//                        [idx+1, rnd(), rnd(), rnd()/36]
+//                    ]);
+//                };
+                
+                for(var i=0; i<data_arr.length; i++){
+//                    console.log(typeof data_arr[i][0]);
+                    data.addRows([
+                        [i, data_arr[i][0], data_arr[i][1], data_arr[i][2]]
+                    ])
+                };
+                
+                var options = {
+                    title: 'Balancing Robot Indicator Chart',
+    //                width: 1000,
+    //                height: 500,
+                    // Gives each series an axis that matches the vAxes number below.
+                    series: {
+                        0: {targetAxisIndex: 0},
+                        1: {targetAxisIndex: 1}
+                    },
+                    vAxes: {
+                        // Adds titles to each axis.
+                        0: {title: 'Acc'},
+                        1: {title: 'Gyro'}
+                    },
+                    hAxis: {
+                        title: 'Time',
+                        viewWindow:{
+                            min:0,
+                            max:200
+                        }
+                    },
+                    vAxis: {
+                        min: -180,
+                        max: 180
+                    },
+
+                    chartArea: {
+                        width: '90%'
+                    },
+
+                    trendlines: {
+                      0: {type: 'linear', color: '#00FFFF', opacity: .3},
+                      1: {type: 'linear', color: '#FFB6C1', opacity: .3}
+                    }
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(data, options);
+            };
+
+            /////////////////////////////////////////////
+            
+            //////////////////////////////////////////////////////
+            
+//            data.insertRows(1, [
+//                [data.getNumberOfRows()+1, rnd(), rnd(), rnd()/36]
+//            ]);
+//            data.addRows([
+//                [1, rnd(), rnd(), rnd()/36]
+//            ])
+//            chart.draw(data, options);
+//            
+            
+            //////////////////////////////////////////////////////
+
+
+      });
+          
+      function rnd(){
+            min = -180;
+            max = 180;
+            return (Math.random() * (max-min) + min);
+      }
+          
+      });
+    </script>
+  </head>
+  <body>
+      <ul id="messages"></ul>
+      <table>
+        <tr>
+            <td style="width:10%"><img src="https://user-images.githubusercontent.com/30471027/83739503-a57aa080-a690-11ea-9d7e-2590258d15a1.png"></td>
+            <td style="width:90%"><div id="chart_div"></div></td>
+        </tr>
+      </table>
+    <form action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+      
+      
+  </body>
+</html>
